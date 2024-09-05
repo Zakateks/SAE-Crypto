@@ -1,5 +1,6 @@
 import numpy as np
 import streamlit as st
+import pandas as pd
 
 def imprimir_matriz_estetica(matriz, nombre="Matriz"):
     """Imprime la matriz de forma legible, como tablas con corchetes alineados."""
@@ -72,11 +73,72 @@ def completar_palabra(palabra, longitud, relleno=" "):
 # Interfaz de Streamlit
 st.title("Encriptación y Desencriptación con Matrices Modulares")
 
-# Preguntar al usuario el tamaño de la matriz
-tamano = st.number_input("Introduce el tamaño de la matriz (n x n):", min_value=1, max_value=10, value=3)
+# Inicializar el estado del botón si no existe
+if 'expandidos' not in st.session_state:
+    st.session_state.expandidos = False
+
+# Texto introductorio completo
+texto_introductorio = """
+En la historia, la criptografía se usó para asegurar mensajes entre militares y políticos, ocultando su contenido a quienes no estaban autorizados a leerlos. Aunque los métodos han evolucionado, el objetivo sigue siendo proteger la información y garantizar la privacidad.
+
+Nuestra aplicación utiliza el cifrado de Hill, un método que emplea matrices para cifrar y descifrar mensajes. Los textos se convierten en bloques numéricos, se cifran con una matriz y se descifran utilizando la matriz inversa.
+
+Hoy en día, el cifrado de Hill se utiliza principalmente con fines educativos. Los métodos más avanzados, como el cifrado RSA, son los que se emplean en aplicaciones críticas, como la seguridad de transacciones financieras en línea y comunicaciones digitales.
+"""
+
+# Texto parcial
+texto_parcial = texto_introductorio.split("\n\n")[0] + "..."
+
+# Mostrar el texto y el botón
+if st.session_state.expandidos:
+    st.write(texto_introductorio)
+    boton_texto = "Leer menos"
+else:
+    st.write(texto_parcial)
+    boton_texto = "Leer más"
+
+if st.button(boton_texto):
+    st.session_state.expandidos = not st.session_state.expandidos
+    # Actualizar el texto del botón para el siguiente clic
+    st.experimental_rerun()
+
+st.write("### Diccionario de Valores Asignados")
+st.write("""
+Para comenzar con el proceso de encriptado, primero debemos asignar un valor numérico a cada carácter del alfabeto. Esto nos permitirá convertir el texto en una representación numérica que puede ser procesada por la matriz de cifrado.
+""")
 
 # Crear diccionario de valores para el abecedario
 diccionario_valores = crear_diccionario_valores()
+
+# Mostrar la tabla con los valores asignados a cada carácter en formato horizontal
+tabla_valores_horizontal = pd.DataFrame(diccionario_valores.items(), columns=['Carácter', 'Valor']).T
+st.table(tabla_valores_horizontal)
+
+st.write("""
+Analizando nuestra tabla de caracteres, tenemos un total de 28, ya que estamos contando el espacio " " como caracter. Por lo tanto nuestras matrices las ejecutaremos tomando en cuenta la cantidad de caracteres, es decir en modulo 28.
+""")
+
+# Crear dos columnas del mismo tamaño
+col1, col2 = st.columns(2)
+
+with col1:
+    # Primer rectángulo: número de entrada para el tamaño de la matriz
+    tamano = st.number_input("‎ ‎ ‎ ‎ ‎‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎  ‎ ‎ ‎ ‎  Introduce el tamaño de la matriz (n x n):", min_value=1, max_value=10, value=3)
+
+with col2:
+    # Texto antes del botón de generación automática con tamaño de letra ajustado
+    st.markdown(
+        """
+        <div style="font-size:18px;">
+        ‎ ‎ ‎ ‎ ‎ 
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    # Botón para generar automáticamente
+    if st.button("‎ ‎‎ ‎‎ ‎‎ ‎‎ ‎Generar matriz automáticamente‎ ‎‎ ‎‎ ‎‎ ‎‎ ‎"):
+        st.write(f"El tamaño de la matriz es: {tamaño}")
+
 
 # Leer la matriz del usuario
 st.write(f"Introduce los elementos de la matriz {tamano}x{tamano}, fila por fila:")
@@ -167,3 +229,4 @@ if len(matriz) == tamano:
                     desencriptado_mods = " ".join(f"{int(resultado_desencriptado_mod_28[i][j]):02d}" for j in range(tamano))
                     letras_desencriptadas_fila = " ".join(letras_desencriptadas[i*tamano:(i+1)*tamano])
                     st.text(f"[{fila_inversa}] x [{resultado_mod}] = [{desencriptado_nums}] ⇒ [{desencriptado_nums}] mod(28) = [{desencriptado_mods}] [{letras_desencriptadas_fila}]")
+
